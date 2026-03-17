@@ -191,8 +191,6 @@ html, body {
   border-color: var(--ouro-claro);
 }
 
-.api-key-area { display: none; margin-top: 0.75rem; }
-.api-key-area.visible { display: block; }
 
 .api-input {
   width: 100%;
@@ -691,19 +689,9 @@ html, body {
       Poucos conhecem a profundidade que carregam.
     </p>
 
-    <button class="btn-entrar" onclick="iniciarEntrada()">
+    <button class="btn-entrar" onclick="abrirChat()">
       Entrar no Promontório
     </button>
-
-    <div class="api-key-area" id="api-key-area">
-      <input
-        class="api-input"
-        id="api-key-input"
-        type="password"
-        placeholder="Cole sua chave sk-ant-..."
-        autocomplete="off"
-      />
-      <div class="api-error" id="api-error"></div>
       <button class="btn-confirmar" onclick="confirmarChave()">Confirmar</button>
     </div>
 
@@ -751,7 +739,7 @@ const IMG_ENCONTRO = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAk
 const WORKER_URL = 'https://yellow-surf-c0d4.guibarros2011.workers.dev';
 
 let historico = [];
-let apiKey = '';
+
 let carregando = false;
 let analiseCompleta = '';
 let nomePersonagem = '';
@@ -759,11 +747,6 @@ let emailEnviado = false;
 
 window.addEventListener('load', () => {
   document.getElementById('entry-bg-img').style.backgroundImage = `url(${IMG_FAROL})`;
-  const chaveSalva = localStorage.getItem('dauro_api_key');
-  if (chaveSalva && chaveSalva.startsWith('sk-ant-')) {
-    apiKey = chaveSalva;
-    abrirChat();
-  }
 
   document.getElementById('user-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -778,28 +761,7 @@ window.addEventListener('load', () => {
   });
 });
 
-function iniciarEntrada() {
-  const chaveSalva = localStorage.getItem('dauro_api_key');
-  if (chaveSalva && chaveSalva.startsWith('sk-ant-')) {
-    apiKey = chaveSalva;
-    abrirChat();
-    return;
-  }
-  document.getElementById('api-key-area').classList.add('visible');
-}
 
-function confirmarChave() {
-  const chave = document.getElementById('api-key-input').value.trim();
-  const erro = document.getElementById('api-error');
-  if (!chave.startsWith('sk-ant-')) {
-    erro.textContent = 'A chave deve começar com sk-ant-...';
-    return;
-  }
-  erro.textContent = '';
-  apiKey = chave;
-  localStorage.setItem('dauro_api_key', chave);
-  abrirChat();
-}
 
 function abrirChat() {
   document.getElementById('screen-entry').style.opacity = '0';
@@ -846,7 +808,7 @@ async function chamarAPI(mensagemInicial) {
     const resp = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'chat', messages: historico, apiKey }),
+      body: JSON.stringify({ action: 'chat', messages: historico }),
     });
 
     const dados = await resp.json();
@@ -952,7 +914,7 @@ async function enviarEmail() {
         analysis: analiseCompleta,
         imageUrl,
         characterName: nomePersonagem || null,
-        apiKey,
+        
       }),
     });
 
